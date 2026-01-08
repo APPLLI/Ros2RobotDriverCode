@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿克曼小车ROS2底层驱动 - 项目说明文档</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            border-bottom: 4px solid #764ba2;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        h2 {
+            color: #764ba2;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 5px solid #667eea;
+            font-size: 1.8em;
+        }
+        
+        h3 {
+            color: #555;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        h4 {
+            color: #666;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+        
+        .code-block code {
+            color: #f8f8f2;
+        }
+        
+        .interface-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .interface-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .interface-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .interface-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .interface-table tr:hover {
+            background: #e9ecef;
+        }
+        
+        .flow-diagram {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #667eea;
+        }
+        
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .flow-step::before {
+            content: "→";
+            position: absolute;
+            left: 15px;
+            font-weight: bold;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .warning {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .module-card {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .module-title {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-top: 10px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 2px solid #667eea;
+        }
+        
+        .toc h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            display: block;
+            padding: 5px 0;
+            transition: padding-left 0.3s;
+        }
+        
+        .toc a:hover {
+            padding-left: 10px;
+            color: #764ba2;
+        }
+        
+        .parameter-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .parameter-table th,
+        .parameter-table td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        .parameter-table th {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .parameter-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 阿克曼小车ROS2底层驱动项目说明文档（2025年7月版）</h1>
+        
+        <div class="toc">
+            <h3>📑 目录</h3>
+            <ul>
+                <li><a href="#overview">1. 项目概述</a></li>
+                <li><a href="#architecture">2. 系统架构</a></li>
+                <li><a href="#hardware">3. 硬件接口</a></li>
+                <li><a href="#modules">4. 核心模块详解</a></li>
+                <li><a href="#interfaces">5. 接口说明</a></li>
+                <li><a href="#control-logic">6. 控制逻辑</a></li>
+                <li><a href="#communication">7. 通信协议</a></li>
+                <li><a href="#knowledge">8. 知识点总结</a></li>
+                <li><a href="#changelog">9. 版本更新说明（2024 → 2025）</a></li>
+                <li><a href="#ros2-nav">10. ROS2 路径规划与多传感器融合导航概述</a></li>
+            </ul>
+        </div>
+
+        <!-- 项目概述 -->
+        <div class="section" id="overview">
+            <h2>1. 项目概述</h2>
+            <p>本项目是基于<strong>STM32F103C8</strong>微控制器的阿克曼转向小车底层驱动系统，用于与ROS2（机器人操作系统）进行通信和控制。系统实现了双电机速度控制、舵机转向控制、姿态感知和电池监控等功能。</p>
+            <p><strong>当前文档对应代码版本：</strong>2025-07（相对于 2024 版本在 PID 参数、数据发送频率与 ROS2 导航接口方面做了小幅升级）。</p>
+            
+            <div class="info">
+                <strong>主要特性：</strong>
+                <ul>
+                    <li>双路电机速度PID闭环控制</li>
+                    <li>舵机转向角度控制</li>
+                    <li>MPU6050姿态传感器集成（DMP模式）</li>
+                    <li>编码器速度反馈</li>
+                    <li>电池电压监测与低电压保护</li>
+                    <li>与ROS2系统的串口通信协议</li>
+                    <li>5ms定时中断控制周期</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 系统架构 -->
+        <div class="section" id="architecture">
+            <h2>2. 系统架构</h2>
+            
+            <h3>2.1 硬件架构</h3>
+            <div class="module-card">
+                <div class="module-title">主控制器</div>
+                <p><strong>STM32F103C8</strong> - ARM Cortex-M3内核，72MHz主频</p>
+            </div>
+            
+            <div class="module-card">
+                <div class="module-title">通信接口</div>
+                <ul>
+                    <li><strong>USART1</strong>：与树莓派/ROS2通信（115200波特率）</li>
+                    <li><strong>USART3</strong>：调试串口（115200波特率）</li>
+                </ul>
+            </div>
+            
+            <div class="module-card">
+                <div class="module-title">传感器模块</div>
+                <ul>
+                    <li><strong>MPU6050</strong>：六轴姿态传感器（I2C接口，DMP模式）</li>
+                    <li><strong>编码器</strong>：TIM3/TIM4编码器接口模式，左右轮速度反馈</li>
+                    <li><strong>ADC</strong>：PA4引脚，电池电压监测</li>
+                </ul>
+            </div>
+            
+            <div class="module-card">
+                <div class="module-title">执行器模块</div>
+                <ul>
+                    <li><strong>电机驱动</strong>：TIM2四路PWM输出（10kHz），AT8870驱动芯片</li>
+                    <li><strong>舵机控制</strong>：TIM1_CH2 PWM输出（50Hz），SG90舵机</li>
+                </ul>
+            </div>
+
+            <h3>2.2 软件架构</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">系统初始化（GPIO、时钟、外设）</div>
+                <div class="flow-step">传感器初始化（MPU6050、编码器、ADC）</div>
+                <div class="flow-step">PWM初始化（电机、舵机）</div>
+                <div class="flow-step">PID控制器初始化</div>
+                <div class="flow-step">外部中断初始化（MPU6050 INT信号）</div>
+                <div class="flow-step">主循环：数据发送（70Hz）</div>
+                <div class="flow-step">中断处理：控制逻辑（5ms周期）</div>
+            </div>
+        </div>
+
+        <!-- 硬件接口 -->
+        <div class="section" id="hardware">
+            <h2>3. 硬件接口</h2>
+            
+            <h3>3.1 GPIO引脚分配</h3>
+            <table class="interface-table">
+                <thead>
+                    <tr>
+                        <th>引脚</th>
+                        <th>功能</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PA0</td>
+                        <td>TIM2_CH1 (PWMA2)</td>
+                        <td>左电机PWM输出2</td>
+                    </tr>
+                    <tr>
+                        <td>PA1</td>
+                        <td>TIM2_CH2 (PWMB2)</td>
+                        <td>右电机PWM输出2</td>
+                    </tr>
+                    <tr>
+                        <td>PA2</td>
+                        <td>TIM2_CH3 (PWMA1)</td>
+                        <td>左电机PWM输出1</td>
+                    </tr>
+                    <tr>
+                        <td>PA3</td>
+                        <td>TIM2_CH4 (PWMB1)</td>
+                        <td>右电机PWM输出1</td>
+                    </tr>
+                    <tr>
+                        <td>PA4</td>
+                        <td>ADC1_IN4</td>
+                        <td>电池电压采样</td>
+                    </tr>
+                    <tr>
+                        <td>PA6</td>
+                        <td>TIM3_CH1</td>
+                        <td>右轮编码器A相</td>
+                    </tr>
+                    <tr>
+                        <td>PA7</td>
+                        <td>TIM3_CH2</td>
+                        <td>右轮编码器B相</td>
+                    </tr>
+                    <tr>
+                        <td>PA8</td>
+                        <td>EXTI8</td>
+                        <td>MPU6050中断信号（5ms触发）</td>
+                    </tr>
+                    <tr>
+                        <td>PA9</td>
+                        <td>USART1_TX</td>
+                        <td>与ROS2通信发送</td>
+                    </tr>
+                    <tr>
+                        <td>PA10</td>
+                        <td>USART1_RX</td>
+                        <td>与ROS2通信接收</td>
+                    </tr>
+                    <tr>
+                        <td>PB0</td>
+                        <td>TIM1_CH2N (PWMC)</td>
+                        <td>舵机PWM输出</td>
+                    </tr>
+                    <tr>
+                        <td>PB6</td>
+                        <td>TIM4_CH1</td>
+                        <td>左轮编码器A相</td>
+                    </tr>
+                    <tr>
+                        <td>PB7</td>
+                        <td>TIM4_CH2</td>
+                        <td>左轮编码器B相</td>
+                    </tr>
+                    <tr>
+                        <td>PB10</td>
+                        <td>USART3_TX</td>
+                        <td>调试串口发送</td>
+                    </tr>
+                    <tr>
+                        <td>PB11</td>
+                        <td>USART3_RX</td>
+                        <td>调试串口接收</td>
+                    </tr>
+                    <tr>
+                        <td>PB6/PB7</td>
+                        <td>I2C1_SCL/SDA</td>
+                        <td>MPU6050通信接口</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>3.2 定时器配置</h3>
+            <table class="parameter-table">
+                <thead>
+                    <tr>
+                        <th>定时器</th>
+                        <th>功能</th>
+                        <th>频率</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>TIM1</td>
+                        <td>舵机PWM</td>
+                        <td>50Hz</td>
+                        <td>ARR=60000-1, PSC=24-1</td>
+                    </tr>
+                    <tr>
+                        <td>TIM2</td>
+                        <td>电机PWM</td>
+                        <td>10kHz</td>
+                        <td>ARR=7200-1, PSC=1-1</td>
+                    </tr>
+                    <tr>
+                        <td>TIM3</td>
+                        <td>右轮编码器</td>
+                        <td>编码器模式</td>
+                        <td>四倍频计数</td>
+                    </tr>
+                    <tr>
+                        <td>TIM4</td>
+                        <td>左轮编码器</td>
+                        <td>编码器模式</td>
+                        <td>四倍频计数</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 核心模块详解 -->
+        <div class="section" id="modules">
+            <h2>4. 核心模块详解</h2>
+            
+            <h3>4.1 通信模块 (mbotLinuxUsart)</h3>
+            <div class="module-card">
+                <div class="module-title">功能描述</div>
+                <p>实现STM32与ROS2系统之间的串口通信协议，包括数据接收和发送功能。</p>
+                
+                <h4>主要函数：</h4>
+                <ul>
+                    <li><code>usartReceiveOneData()</code> - 接收ROS2控制指令</li>
+                    <li><code>usartSendData()</code> - 发送状态数据到ROS2</li>
+                    <li><code>getCrc8()</code> - CRC8校验算法</li>
+                </ul>
+            </div>
+
+            <h3>4.2 PID控制模块 (pid)</h3>
+            <div class="module-card">
+                <div class="module-title">功能描述</div>
+                <p>实现双路电机速度PID闭环控制，采用增量式PID算法。</p>
+                
+                <h4>PID参数（左/右电机）：</h4>
+                <table class="parameter-table">
+                    <thead>
+                        <tr>
+                            <th>参数</th>
+                            <th>值</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Kp</td>
+                            <td>1024 × 4.0</td>
+                            <td>比例系数（固定点运算，左移10位）</td>
+                        </tr>
+                        <tr>
+                            <td>Ki</td>
+                            <td>1024 × 0</td>
+                            <td>积分系数（未使用）</td>
+                        </tr>
+                        <tr>
+                            <td>Kd</td>
+                            <td>1024 × 20.0</td>
+                            <td>微分系数</td>
+                        </tr>
+                        <tr>
+                            <td>Ur</td>
+                            <td>1024 × 4000</td>
+                            <td>输出限幅值</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h4>PID算法公式：</h4>
+                <div class="code-block">
+U_k = U_kk + Kp×(ek - ekk) + Ki×ek + Kd×(ek - 2×ekk + ekkk)
+                </div>
+                <p>其中：ek为当前误差，ekk为上一次误差，ekkk为前一次误差</p>
+            </div>
+
+            <h3>4.3 电机控制模块 (motor)</h3>
+            <div class="module-card">
+                <div class="module-title">功能描述</div>
+                <p>实现左右电机和舵机的PWM控制，包括方向控制和限幅保护。</p>
+                
+                <h4>电机控制逻辑：</h4>
+                <ul>
+                    <li><strong>左电机</strong>：motorLeft > 0 正转，motorLeft < 0 反转</li>
+                    <li><strong>右电机</strong>：motorRight > 0 正转，motorRight < 0 反转</li>
+                    <li><strong>舵机</strong>：角度范围 -50° ~ +50°，中心位置90°（1.5ms）</li>
+                </ul>
+                
+                <h4>舵机角度计算：</h4>
+                <div class="code-block">
+// 0°对应0.5ms，90°对应1.5ms，180°对应2.5ms
+// 分辨率：1° = 33.3 计数单位
+// 中心位置（90°）：4500 = (60000 / 20ms) × 1.5ms
+motorFrontSteer = 4500 ± (角度 × 33.3)
+                </div>
+            </div>
+
+            <h3>4.4 编码器模块 (encoder)</h3>
+            <div class="module-card">
+                <div class="module-title">功能描述</div>
+                <p>通过TIM3/TIM4编码器接口模式读取左右轮编码器脉冲，计算电机转速。</p>
+                
+                <h4>速度计算公式：</h4>
+                <div class="code-block">
+// 编码器参数：
+// - 每圈脉冲数：1560
+// - 轮子半径：0.03m
+// - 每脉冲距离：2×π×0.03 / 1560 = 0.000120830m
+// - 控制周期：5ms（200Hz）
+// - 速度单位：mm/s（已×1000）
+
+速度 = 脉冲变化量 × 1000 × 200 × 0.000120830
+                </div>
+            </div>
+
+            <h3>4.5 MPU6050姿态模块</h3>
+            <div class="module-card">
+                <div class="module-title">功能描述</div>
+                <p>使用MPU6050的DMP（数字运动处理器）模式获取车辆姿态角（Yaw）。</p>
+                
+                <h4>配置参数：</h4>
+                <ul>
+                    <li>采样率：200Hz</li>
+                    <li>陀螺仪量程：±2000°/s</li>
+                    <li>加速度计量程：±2G</li>
+                    <li>中断频率：5ms（200Hz）</li>
+                </ul>
+                
+                <h4>角度获取：</h4>
+                <div class="code-block">
+// 从四元数计算Yaw角
+Yaw = atan2(2×(q1×q2 + q0×q3), q0²+q1²-q2²-q3²) × 57.3
+// 转换为0-359°范围
+if(Yaw < 0) Yaw = Yaw + 360
+                </div>
+            </div>
+
+            <h3>4.6 ADC电池监测模块</h3>
+            <div class="module-card">
+                <div class="module-title">功能描述</div>
+                <p>通过ADC采样电池电压，实现低电压保护功能。</p>
+                
+                <h4>电压计算：</h4>
+                <div class="code-block">
+// ADC分辨率：12位（0-4095）
+// 参考电压：3.3V
+// 分压比：1/6（通过电阻分压）
+电压(mV) = ADC值 × 3.3 × 6 × 100 / 4096
+                </div>
+                
+                <div class="warning">
+                    <strong>低电压保护：</strong>当电池电压低于11.1V时，系统自动关闭电机输出并报警。
+                </div>
+            </div>
+        </div>
+
+        <!-- 接口说明 -->
+        <div class="section" id="interfaces">
+            <h2>5. 接口说明</h2>
+            
+            <h3>5.1 串口通信接口</h3>
+            <h4>接收接口（ROS2 → STM32）</h4>
+            <table class="interface-table">
+                <thead>
+                    <tr>
+                        <th>函数名</th>
+                        <th>参数</th>
+                        <th>返回值</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>usartReceiveOneData()</td>
+                        <td>USARTx, *leftSpeedSet, *rightSpeedSet, *frontAngleSet, *ctrlFlag</td>
+                        <td>int</td>
+                        <td>接收ROS2控制指令，解析速度设定值和转向角度</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h4>发送接口（STM32 → ROS2）</h4>
+            <table class="interface-table">
+                <thead>
+                    <tr>
+                        <th>函数名</th>
+                        <th>参数</th>
+                        <th>返回值</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>usartSendData()</td>
+                        <td>USARTx, leftVel, rightVel, angle, ctrlFlag</td>
+                        <td>void</td>
+                        <td>发送当前速度、角度和状态标志到ROS2</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>5.2 电机控制接口</h3>
+            <table class="interface-table">
+                <thead>
+                    <tr>
+                        <th>函数名</th>
+                        <th>参数</th>
+                        <th>功能</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Set_Pwm()</td>
+                        <td>motorLeft, motorRight, motorFrontSteer</td>
+                        <td>设置左右电机和舵机的PWM输出值</td>
+                    </tr>
+                    <tr>
+                        <td>Steer_Ctrl()</td>
+                        <td>frontAngleSet, *motorFrontSteer</td>
+                        <td>根据设定角度计算舵机PWM值（-50°~+50°）</td>
+                    </tr>
+                    <tr>
+                        <td>Turn_Off()</td>
+                        <td>voltage</td>
+                        <td>低电压保护，返回1表示异常，0表示正常</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>5.3 PID控制接口</h3>
+            <table class="interface-table">
+                <thead>
+                    <tr>
+                        <th>函数名</th>
+                        <th>参数</th>
+                        <th>功能</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PID_Init()</td>
+                        <td>void</td>
+                        <td>初始化左右电机PID控制器参数</td>
+                    </tr>
+                    <tr>
+                        <td>Pid_Ctrl()</td>
+                        <td>*leftMotor, *rightMotor</td>
+                        <td>执行PID控制，更新电机PWM输出</td>
+                    </tr>
+                    <tr>
+                        <td>PID_common()</td>
+                        <td>set, jiance, *p</td>
+                        <td>增量式PID算法核心函数</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>5.4 传感器接口</h3>
+            <table class="interface-table">
+                <thead>
+                    <tr>
+                        <th>函数名</th>
+                        <th>参数</th>
+                        <th>功能</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Get_Motor_Speed()</td>
+                        <td>*leftSpeed, *rightSpeed</td>
+                        <td>读取编码器并计算左右轮速度（mm/s）</td>
+                    </tr>
+                    <tr>
+                        <td>getAngle()</td>
+                        <td>*yaw, *yaw_acc_error</td>
+                        <td>读取MPU6050 DMP数据并计算Yaw角（0-359°）</td>
+                    </tr>
+                    <tr>
+                        <td>Get_battery_volt_average()</td>
+                        <td>*Voltage, time</td>
+                        <td>读取电池电压平均值（单位：10mV）</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 控制逻辑 -->
+        <div class="section" id="control-logic">
+            <h2>6. 控制逻辑</h2>
+            
+            <h3>6.1 主循环逻辑</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">系统初始化完成</div>
+                <div class="flow-step">进入主循环（while(1)）</div>
+                <div class="flow-step">每14.4ms发送一次数据（70Hz）</div>
+                <div class="flow-step">发送内容：左速度、右速度、Yaw角、控制标志</div>
+                <div class="flow-step">读取MPU6050角度数据</div>
+            </div>
+            
+            <div class="code-block">
+// 主循环代码片段
+while(1) {
+    if(sendCount == 0) {  // 每25次循环发送一次（约70Hz）
+        usartSendData(USART1, leftSpeedNow, rightSpeedNow, yaw*50, sendCtrlFlag);
+        sendCount++;
+    } else {
+        sendCount++;
+        if(sendCount == 25) sendCount = 0;
+    }
+    getAngle(&yaw, &yaw_acc_error);  // 读取角度
+}
+            </div>
+
+            <h3>6.2 5ms中断控制逻辑</h3>
+            <div class="info">
+                <strong>中断触发源：</strong>MPU6050的INT引脚，每5ms产生一次下降沿中断
+            </div>
+            
+            <div class="flow-diagram">
+                <div class="flow-step">EXTI8中断触发（MPU6050 INT信号）</div>
+                <div class="flow-step">清除中断标志位</div>
+                <div class="flow-step">LED闪烁指示（200ms周期）</div>
+                <div class="flow-step">累计Yaw角度漂移误差</div>
+                <div class="flow-step">读取电池电压（100次平均）</div>
+                <div class="flow-step">读取编码器计算当前速度</div>
+                <div class="flow-step">更新PID设定值和当前值</div>
+                <div class="flow-step">执行PID控制计算</div>
+                <div class="flow-step">执行舵机角度控制</div>
+                <div class="flow-step">检查电池电压，执行保护逻辑</div>
+                <div class="flow-step">更新PWM输出到电机和舵机</div>
+            </div>
+            
+            <div class="code-block">
+void EXTI9_5_IRQHandler(void) {
+    EXTI_ClearITPendingBit(EXTI_Line8);
+    Led_Flash(200);
+    yaw_acc_error += FIVE_MS_ERROR;  // 角度漂移补偿
+    Get_battery_volt_average(&Voltage, 100);
+    Get_Motor_Speed(&leftSpeedNow, &rightSpeedNow);
+    
+    // 更新PID输入
+    pid_Task_Letf.speedSet = leftSpeedSet;
+    pid_Task_Right.speedSet = rightSpeedSet;
+    pid_Task_Letf.speedNow = leftSpeedNow;
+    pid_Task_Right.speedNow = rightSpeedNow;
+    
+    Pid_Ctrl(&motorLeft, &motorRight);  // PID控制
+    Steer_Ctrl(frontAngleSet, &motorFrontSteer);  // 舵机控制
+    
+    if(Turn_Off(Voltage) == 0) {  // 电压正常
+        BEEP_Disable();
+        Set_Pwm(motorLeft, motorRight, motorFrontSteer);
+    } else {  // 电压异常
+        BEEP_Flash(20);  // 报警
+    }
+}
+            </div>
+
+            <h3>6.3 USART1接收中断逻辑</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">USART1接收中断触发</div>
+                <div class="flow-step">检查接收标志位（RXNE）</div>
+                <div class="flow-step">清除中断标志</div>
+                <div class="flow-step">调用usartReceiveOneData()解析数据</div>
+                <div class="flow-step">更新leftSpeedSet、rightSpeedSet、frontAngleSet</div>
+            </div>
+            
+            <div class="code-block">
+void USART1_IRQHandler() {
+    if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+        USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+        usartReceiveOneData(USART1, &leftSpeedSet, &rightSpeedSet, 
+                           &frontAngleSet, &receCtrlFlag);
+    }
+}
+            </div>
+
+            <h3>6.4 控制流程图</h3>
+            <div class="info">
+                <strong>控制周期：</strong>
+                <ul>
+                    <li>主循环：约14.4ms（70Hz）发送数据</li>
+                    <li>控制中断：5ms（200Hz）执行控制逻辑</li>
+                    <li>接收中断：异步，ROS2发送时触发</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 通信协议 -->
+        <div class="section" id="communication">
+            <h2>7. 通信协议</h2>
+            
+            <h3>7.1 数据包格式</h3>
+            <div class="module-card">
+                <div class="module-title">接收数据包（ROS2 → STM32）</div>
+                <div class="code-block">
+格式：55 AA size [数据] crc8 0D 0A
+
+数据包结构：
+- 帧头：0x55 0xAA（2字节）
+- 数据长度：size（1字节）
+- 数据内容（size字节）：
+  * 左速度设定值（2字节，short类型）
+  * 右速度设定值（2字节，short类型）
+  * 转向角度设定值（2字节，short类型）
+  * 控制标志（1字节）
+- CRC8校验（1字节）
+- 帧尾：0x0D 0x0A（2字节）
+
+总长度：2 + 1 + 7 + 1 + 2 = 13字节
+                </div>
+            </div>
+            
+            <div class="module-card">
+                <div class="module-title">发送数据包（STM32 → ROS2）</div>
+                <div class="code-block">
+格式：55 AA size [数据] crc8 0D 0A
+
+数据包结构：
+- 帧头：0x55 0xAA（2字节）
+- 数据长度：size = 7（1字节）
+- 数据内容（7字节）：
+  * 左速度当前值（2字节，short类型，单位：mm/s）
+  * 右速度当前值（2字节，short类型，单位：mm/s）
+  * Yaw角度（2字节，short类型，实际角度×50）
+  * 控制标志（1字节）
+- CRC8校验（1字节）
+- 帧尾：0x0D 0x0A（2字节）
+
+总长度：2 + 1 + 7 + 1 + 2 = 13字节
+                </div>
+            </div>
+
+            <h3>7.2 CRC8校验算法</h3>
+            <div class="code-block">
+unsigned char getCrc8(unsigned char *ptr, unsigned short len) {
+    unsigned char crc = 0;
+    unsigned char i;
+    while(len--) {
+        crc ^= *ptr++;
+        for(i = 0; i < 8; i++) {
+            if(crc & 0x01)
+                crc = (crc >> 1) ^ 0x8C;
+            else 
+                crc >>= 1;
+        }
+    }
+    return crc;
+}
+            </div>
+
+            <h3>7.3 数据解析流程</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">等待帧头0x55</div>
+                <div class="flow-step">检测到0xAA，确认帧头</div>
+                <div class="flow-step">读取数据长度size</div>
+                <div class="flow-step">读取size字节数据</div>
+                <div class="flow-step">读取CRC8校验值</div>
+                <div class="flow-step">校验数据完整性</div>
+                <div class="flow-step">读取帧尾0x0D 0x0A</div>
+                <div class="flow-step">解析数据并更新控制变量</div>
+            </div>
+        </div>
+
+        <!-- 知识点总结 -->
+        <div class="section" id="knowledge">
+            <h2>8. 知识点总结</h2>
+            
+            <h3>8.1 STM32相关知识点</h3>
+            <div class="module-card">
+                <ul>
+                    <li><strong>定时器编码器模式</strong>：TIM3/TIM4配置为编码器接口模式，自动计数编码器脉冲</li>
+                    <li><strong>PWM输出</strong>：TIM1/TIM2配置为PWM模式，通过ARR和CCR寄存器控制占空比</li>
+                    <li><strong>外部中断</strong>：EXTI8配置为下降沿触发，响应MPU6050的INT信号</li>
+                    <li><strong>ADC采样</strong>：12位ADC，单次转换模式，采样电池电压</li>
+                    <li><strong>串口通信</strong>：USART配置为115200波特率，中断接收模式</li>
+                    <li><strong>I2C通信</strong>：软件模拟I2C，与MPU6050通信</li>
+                    <li><strong>固定点运算</strong>：PID参数使用1024倍放大，避免浮点运算</li>
+                </ul>
+            </div>
+
+            <h3>8.2 控制算法知识点</h3>
+            <div class="module-card">
+                <ul>
+                    <li><strong>增量式PID</strong>：相比位置式PID，增量式更适合电机控制，避免积分饱和</li>
+                    <li><strong>速度闭环控制</strong>：编码器反馈 → PID计算 → PWM输出 → 电机转动</li>
+                    <li><strong>角度漂移补偿</strong>：MPU6050存在漂移，通过累计误差进行补偿</li>
+                    <li><strong>限幅保护</strong>：PID输出和舵机角度都有限幅，防止超出安全范围</li>
+                </ul>
+            </div>
+
+            <h3>8.3 传感器知识点</h3>
+            <div class="module-card">
+                <ul>
+                    <li><strong>MPU6050 DMP</strong>：数字运动处理器，硬件解算四元数，降低CPU负担</li>
+                    <li><strong>编码器测速</strong>：通过单位时间内脉冲变化量计算速度</li>
+                    <li><strong>ADC分压采样</strong>：电池电压通过电阻分压后采样，扩大测量范围</li>
+                </ul>
+            </div>
+
+            <h3>8.4 通信协议知识点</h3>
+            <div class="module-card">
+                <ul>
+                    <li><strong>帧同步</strong>：通过帧头0x55 0xAA实现数据包同步</li>
+                    <li><strong>数据校验</strong>：CRC8校验确保数据传输正确性</li>
+                    <li><strong>状态机解析</strong>：使用状态机解析串口数据包</li>
+                    <li><strong>字节序</strong>：多字节数据使用小端序（Little-Endian）</li>
+                </ul>
+            </div>
+
+            <h3>8.5 系统设计知识点</h3>
+            <div class="module-card">
+                <ul>
+                    <li><strong>中断优先级</strong>：控制中断优先级高于通信中断，确保实时性</li>
+                    <li><strong>模块化设计</strong>：代码按功能模块划分，便于维护和扩展</li>
+                    <li><strong>安全保护</strong>：低电压保护、角度限幅、PWM限幅等多重保护机制</li>
+                    <li><strong>实时性保证</strong>：5ms控制周期，确保系统响应速度</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 版本更新说明 -->
+        <div class="section" id="changelog">
+            <h2>9. 版本更新说明（2024 → 2025）</h2>
+            <div class="module-card">
+                <div class="module-title">2024-07 初始版本</div>
+                <ul>
+                    <li>完成 STM32F103C8 底层驱动（编码器、PWM、电机/舵机控制、MPU6050 DMP、ADC 电压检测等）。</li>
+                    <li>实现与上位机（树莓派 / PC）之间的自定义串口通信协议。</li>
+                    <li>实现基础双路速度 PID 控制，参数以“快速响应”为主。</li>
+                </ul>
+            </div>
+            <div class="module-card">
+                <div class="module-title">2025-07 升级版本</div>
+                <ul>
+                    <li><strong>PID 参数优化：</strong>减小 Kp、Kd，引入小幅 Ki，提高低速段稳定性和稳态精度，减轻振荡。</li>
+                    <li><strong>串口发送频率调整：</strong>从约 70Hz 调整到约 50Hz，减小串口与上位机负载，提升通信稳定性。</li>
+                    <li><strong>角度量程编码优化：</strong>Yaw 角放大系数由 50 调整为 100，提高高层导航角度分辨率。</li>
+                    <li><strong>代码注释与文档强化：</strong>在关键 C 文件中增加版本历史注释，本文档同步标注 2025-07 版。</li>
+                    <li><strong>ROS2 导航扩展：</strong>在上位机侧新增 <code>ros2_nav/astar_nav_node.py</code>（Python）示例，实现 A* 网格路径规划与多传感器融合接口骨架。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ROS2 路径规划与多传感器融合导航概述 -->
+        <div class="section" id="ros2-nav">
+            <h2>10. ROS2 路径规划与多传感器融合导航概述</h2>
+            <p>为配合底层驱动，本项目在 ROS2 Humble（部署于树莓派 4B，Ubuntu 22.04）侧新增了基于 Python 的 A* 路径规划与多传感器融合导航示例节点。</p>
+            <div class="module-card">
+                <div class="module-title">文件：ros2_nav/astar_nav_node.py</div>
+                <ul>
+                    <li><strong>节点名：</strong><code>multi_sensor_astar_nav_node</code></li>
+                    <li><strong>主要订阅话题：</strong>
+                        <ul>
+                            <li><code>/map</code>（<code>nav_msgs/OccupancyGrid</code>）：全局栅格地图，用于 A* 路径规划。</li>
+                            <li><code>/odom</code>（<code>nav_msgs/Odometry</code>）：里程计，用于短期位姿估计。</li>
+                            <li><code>/imu/data</code>（<code>sensor_msgs/Imu</code>）：IMU 数据，提供姿态与角速度。</li>
+                            <li><code>/scan</code>（<code>sensor_msgs/LaserScan</code>）：激光雷达，提供局部障碍信息。</li>
+                            <li><code>/camera/depth/points</code>（<code>sensor_msgs/PointCloud2</code>）：深度相机点云，可扩展为三维障碍感知。</li>
+                            <li><code>/goal_pose</code>（<code>geometry_msgs/PoseStamped</code>）：导航目标点。</li>
+                        </ul>
+                    </li>
+                    <li><strong>主要发布话题：</strong>
+                        <ul>
+                            <li><code>/planned_path</code>（<code>nav_msgs/Path</code>）：A* 规划出的路径点序列。</li>
+                            <li><code>/cmd_vel</code>（<code>geometry_msgs/Twist</code>）：高层速度/角速度命令，由底层 STM32 转换为左右轮 / 转向角。</li>
+                        </ul>
+                    </li>
+                    <li><strong>规划算法：</strong>
+                        <ul>
+                            <li>基于 <code>OccupancyGrid</code> 的 8 邻域 A* 网格路径规划。</li>
+                            <li>支持障碍阈值设置（栅格值大于阈值视为障碍）。</li>
+                            <li>支持世界坐标与栅格坐标互相转换，方便和 TF/地图对齐。</li>
+                        </ul>
+                    </li>
+                    <li><strong>控制逻辑（示例级）：</strong>
+                        <ul>
+                            <li>简单“纯追踪”路径跟踪：选取路径前瞻点，计算目标航向角。</li>
+                            <li>根据当前 yaw 与目标航向差值生成线速度和角速度命令。</li>
+                            <li>控制频率 50Hz，可根据需要调整。</li>
+                        </ul>
+                    </li>
+                    <li><strong>多传感器融合框架（骨架）：</strong>
+                        <ul>
+                            <li>当前示例仅提供 IMU/LiDAR/深度相机的订阅接口与注释说明。</li>
+                            <li>实际工程中可接入 <code>robot_localization</code>（EKF/UKF）或自研滤波器，将多源信息融合为统一位姿。</li>
+                            <li>栅格地图可由 SLAM（如 <code>slam_toolbox</code>）或离线地图生成。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="info">
+                <strong>整体架构关系：</strong>
+                <ul>
+                    <li>STM32：负责底层传感器采集 / 电机驱动 / 舵机控制，通过串口提供速度与姿态反馈、接收速度/转角指令。</li>
+                    <li>树莓派 + ROS2：负责全局路径规划（A*）、定位与多传感器融合，并将高层控制命令发送至 STM32。</li>
+                    <li>二者通过自定义串口协议解耦：STM32 专注“执行”，ROS2 专注“决策和规划”。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" style="margin-top: 50px; text-align: center; color: #666;">
+            <p><strong>文档生成时间：</strong>2025年7月</p>
+            <p><strong>项目版本：</strong>ROS2阿克曼小车底层驱动 v1.1（含 ROS2 A* 导航示例）</p>
+            <p style="margin-top: 20px;">© 2024-2025 阿克曼小车项目组</p>
+        </div>
+    </div>
+</body>
+</html>
