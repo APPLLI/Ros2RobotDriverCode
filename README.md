@@ -334,10 +334,10 @@ unsigned char getCrc8(unsigned char *ptr, unsigned short len)
 
 - **STM32 部分**：
   - 建议使用 Keil uVision / MDK-ARM，确保工程设置为 UTF-8（或至少源码用 UTF-8 保存）。
-  - 若从其他编辑器（VS Code / Cursor）修改文件，保存格式请选择 UTF-8。
+  - 若从其他编辑器（VS Code ）修改文件，保存格式请选择 UTF-8。
 
 - **ROS2 / Python 部分**：
-  - 推荐使用 VS Code / PyCharm，Python 文件统一为 UTF-8 编码，首行已注明：
+  - 推荐使用 VS Code，Python 文件统一为 UTF-8 编码，首行已注明：
     - `# -*- coding: utf-8 -*-`
 
 ### 7.2 ROS2 端快速运行示例（简要）
